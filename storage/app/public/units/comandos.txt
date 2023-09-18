@@ -1,0 +1,127 @@
+añadir permisos al archivo .pem
+    chmod 400 <pem>
+
+añadir el archivo .pem  a tus claves
+    ssh-add <pem>
+
+acceso ssh a nuestro servidor
+    ssh -i <pem>.pem ubuntu@<ip>
+
+actualizar repositorios con apt-get
+    sudo apt-get update && apt-get upgrade
+
+instalar servidor apache2
+    sudo apt-get install apache2
+    sudo service apache2 start
+
+instalar composer
+   sudo apt install composer
+
+instalar php7.2
+    sudo apt-get install python-software-properties
+    sudo add-apt-repository ppa:ondrej/php
+    sudo apt-get update
+    sudo apt-get install php7.2
+
+instalar módulos requeridos para cualquier proyecto
+    sudo apt-get install php-pear php7.2-curl php7.2-dev php7.2-gd php7.2-mbstring php7.2-zip php7.2-mysql php7.2-xml
+
+cambiar la versión de php con update-alternatives
+    sudo update-alternatives --set php /usr/bin/php<php version>
+
+añadir permisos al usuario ubuntu para el directorio /var/www/html
+    sudo chown -R ubuntu:www-data /var/www/html && chmod -R g+sw /var/www/html
+
+generar clave para clonar repositorios privados a través de ssh
+    Entrar a amazon vía ssh
+        ls -al ~/.ssh
+        ssh-keygen -t rsa -C "unodepiera@uno-de-piera.com"
+        eval "$(ssh-agent -s)"
+        ssh-add ~/.ssh/id_rsa
+        cat ~/.ssh/id_rsa.pub (copiar clave ir a github y crear clave)
+        https://github.com/settings/ssh/new
+
+    otorgar acceso a github
+        ssh -T git@github.com
+
+renombrar .env en servidor
+    mv .env.example .env
+
+añadir permisos a storage
+    sudo chgrp -R www-data storage bootstrap/cache
+    sudo chmod -R ug+rwx storage bootstrap/cache
+
+cambiar document root
+    sudo nano /etc/apache2/sites-enabled/000-default.conf
+
+habilitar mod_rewrite
+    sudo a2enmod rewrite
+
+    sudo nano /etc/apache2/apache2.conf
+    modificar
+        <Directory "/var/www">
+            AllowOverride None
+        </Directory>
+
+        por
+
+        <Directory "/var/www">
+            AllowOverride All
+        </Directory>
+
+    reiniciar servidor apache
+        sudo service apache2 restart
+
+instalar y configurar mysql
+    sudo apt-get install mysql-server php7.2-mysql
+
+    asegurar conexión mysql
+        sudo mysql_secure_installation
+
+    respuestas al comando anterior
+        Change the root password? [Y/n] n
+        Remove anonymous users? [Y/n] Y
+        Disallow root login remotely? [Y/n] Y
+        Remove test database and access to it? [Y/n] Y
+        Reload privilege tables now? [Y/n] Y
+
+crear base de datos y usuario admin
+    configurar nuevo user
+        mysql -u root -p
+
+        CREATE USER '<user>'@'localhost' IDENTIFIED BY '<password>';
+        GRANT ALL ON *.* TO '<user>'@'localhost';
+        FLUSH PRIVILEGES;
+
+    crear base de datos
+        CREATE DATABASE <database>;
+
+    credenciales conectar a mysql vía ssh con datagrip
+    	mysql
+            host: localhost
+            database: <database>
+            user: <user>
+            password: <password>
+        ssh
+            proxy host: ip ubuntu
+            proxy user: ubuntu
+            auth type: key pair
+            private key file: <pem>
+
+instalar nodejs y yarn
+    curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
+    curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+    echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+    sudo apt-get update && sudo apt-get install yarn
+
+instalar let's encrypt con cerbot para autorenovar certificados
+	sudo add-apt-repository ppa:certbot/certbot
+	sudo apt-get update
+	sudo apt-get install python-certbot-apache
+	sudo certbot --apache -d <tudominio>
+
+probar si certbot se renovará automáticamente
+	sudo certbot renew --dry-run
+
+ejecutar prueba de certificado instalado:
+	https://www.ssllabs.com/ssltest/analyze.html?d=cursoslaravel.online
